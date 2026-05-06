@@ -1,0 +1,43 @@
+NGINX CONFIGURATION FOR RAPIDRMS CONNECTOR
+==========================================
+
+1. Create Nginx config file:
+
+sudo tee /etc/nginx/sites-available/rapidrms > /dev/null << 'EOF'
+server {
+  listen 80;
+  server_name api.rapidrms.shre.ai;
+
+  location / {
+    proxy_pass http://localhost:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+  }
+}
+EOF
+
+2. Enable the site:
+
+sudo ln -s /etc/nginx/sites-available/rapidrms /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+
+3. Test HTTP:
+
+curl http://api.rapidrms.shre.ai/health
+
+4. Enable HTTPS with Let's Encrypt:
+
+sudo certbot --nginx -d api.rapidrms.shre.ai
+
+5. Auto-renewal:
+
+sudo systemctl enable certbot.timer
+sudo systemctl start certbot.timer
+
+DONE! Your API is now accessible via HTTPS.

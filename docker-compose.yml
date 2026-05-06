@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  rapidrms-connector:
+    build: .
+    container_name: rapidrms-connector
+    environment:
+      RAPIDRMS_CLIENT_ID: ${RAPIDRMS_CLIENT_ID}
+      RAPIDRMS_EMAIL: ${RAPIDRMS_EMAIL}
+      RAPIDRMS_PASSWORD: ${RAPIDRMS_PASSWORD}
+      RAPIDRMS_API_BASE: ${RAPIDRMS_API_BASE:-https://rapidrmsapi.azurewebsites.net}
+      RAPIDRMS_STORE_NAME: ${RAPIDRMS_STORE_NAME}
+      RAPIDRMS_ENVIRONMENT: ${RAPIDRMS_ENVIRONMENT:-PRODUCTION}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    # For stdio-based MCP, the container must stay running
+    # Actual MCP communication happens over stdin/stdout from calling process
+    stdin_open: true
+    tty: true
+    # For HTTP API variant (if implemented):
+    # ports:
+    #   - "3000:3000"
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3

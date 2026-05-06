@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "rapidrms": {
+      "command": "node",
+      "args": ["/path/to/node_modules/@rapidrms/connector/dist/bin/mcp-server.js"],
+      "env": {
+        "RAPIDRMS_CLIENT_ID": "2",
+        "RAPIDRMS_EMAIL": "partyliquor@hotmail.com",
+        "RAPIDRMS_PASSWORD": "Admin$101",
+        "RAPIDRMS_STORE_NAME": "Party Liquor",
+        "RAPIDRMS_ENVIRONMENT": "PRODUCTION",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}

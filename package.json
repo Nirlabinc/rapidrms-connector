@@ -1,0 +1,54 @@
+{
+  "name": "@rapidrms/connector",
+  "version": "0.1.0",
+  "description": "RapidRMS connector for Claude, Copilot, and Gemini",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "rapidrms-mcp": "./dist/bin/mcp-server.js",
+    "rapidrms-api": "./dist/api/server.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./tools": "./dist/tools/index.js",
+    "./executors": "./dist/executors/index.js",
+    "./client": "./dist/client/rapidrms-api.js",
+    "./mcp": "./dist/mcp/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest",
+    "lint": "eslint src",
+    "mcp": "node dist/bin/mcp-server.js",
+    "mcp:dev": "tsx src/bin/mcp-server.ts",
+    "api": "node dist/api/server.js",
+    "api:dev": "tsx src/api/server.ts",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "rapidrms",
+    "claude",
+    "mcp",
+    "copilot",
+    "gemini",
+    "connector",
+    "tools"
+  ],
+  "author": "RapidRMS",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.22.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.25",
+    "@types/node": "^20.11.0",
+    "eslint": "^8.56.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}

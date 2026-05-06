@@ -9,26 +9,41 @@ import { createLogger } from '../utils/logger.js';
 
 const log = createLogger('executors');
 
+export interface RapidRMSCredentials {
+  clientId: number;
+  email: string;
+  password: string;
+  apiBaseUrl: string;
+}
+
 /**
  * Executor signature
  */
-type ExecutorFn = (input: ToolInput) => Promise<ToolResult>;
+type ExecutorFn = (input: ToolInput, creds?: RapidRMSCredentials) => Promise<ToolResult>;
 
 /**
- * Get RapidRMS client with credentials from env
+ * Get RapidRMS client with credentials from env or provided creds
  */
-function getClient(): RapidRMSClient {
-  const creds = getCredentialsFromEnv();
-  return new RapidRMSClient(creds);
+function getClient(creds?: RapidRMSCredentials): RapidRMSClient {
+  if (creds) {
+    return new RapidRMSClient({
+      clientId: creds.clientId,
+      email: creds.email,
+      password: creds.password,
+      apiBaseUrl: creds.apiBaseUrl,
+    });
+  }
+  const envCreds = getCredentialsFromEnv();
+  return new RapidRMSClient(envCreds);
 }
 
 /**
  * Sales executors
  */
 export const salesExecutors: Record<string, ExecutorFn> = {
-  rapidrms_get_sales_report: async (input: ToolInput) => {
+  rapidrms_get_sales_report: async (input: ToolInput, creds?: RapidRMSCredentials) => {
     try {
-      const client = getClient();
+      const client = getClient(creds);
       const { data } = await client.getSales({
         FromDate: input.startDate,
         ToDate: input.endDate,
@@ -63,9 +78,9 @@ ${topTransactions}`,
     }
   },
 
-  rapidrms_get_revenue_summary: async (input: ToolInput) => {
+  rapidrms_get_revenue_summary: async (input: ToolInput, creds?: RapidRMSCredentials) => {
     try {
-      const client = getClient();
+      const client = getClient(creds);
       const periods: Record<string, { start: string; end: string }> = {
         today: {
           start: new Date().toISOString().split('T')[0],
@@ -114,9 +129,9 @@ Avg Ticket: $${avgTicket.toFixed(2)}`,
     }
   },
 
-  rapidrms_get_top_products: async (input: ToolInput) => {
+  rapidrms_get_top_products: async (input: ToolInput, creds?: RapidRMSCredentials) => {
     try {
-      const client = getClient();
+      const client = getClient(creds);
       const periods = {
         today: {
           start: new Date().toISOString().split('T')[0],
@@ -153,9 +168,9 @@ Avg Ticket: $${avgTicket.toFixed(2)}`,
     }
   },
 
-  rapidrms_get_employee_performance: async (input: ToolInput) => {
+  rapidrms_get_employee_performance: async (input: ToolInput, creds?: RapidRMSCredentials) => {
     try {
-      const client = getClient();
+      const client = getClient(creds);
 
       const periods: Record<string, { start: string; end: string }> = {
         today: {
@@ -230,9 +245,9 @@ ${listing}`,
  * Inventory executors
  */
 export const inventoryExecutors: Record<string, ExecutorFn> = {
-  rapidrms_get_inventory_status: async (input: ToolInput) => {
+  rapidrms_get_inventory_status: async (input: ToolInput, creds?: RapidRMSCredentials) => {
     try {
-      const client = getClient();
+      const client = getClient(creds);
       const { data } = await client.getInventory({
         Category: input.category,
         ItemID: input.itemId,
@@ -263,9 +278,9 @@ ${topByValue}`,
     }
   },
 
-  rapidrms_get_low_stock_items: async (input: ToolInput) => {
+  rapidrms_get_low_stock_items: async (input: ToolInput, creds?: RapidRMSCredentials) => {
     try {
-      const client = getClient();
+      const client = getClient(creds);
       const { data } = await client.getInventory();
 
       const lowStock = data.filter((item: any) =>
@@ -308,7 +323,7 @@ ${belowMin || '(none)'}`,
  * Operations executors
  */
 export const operationsExecutors: Record<string, ExecutorFn> = {
-  rapidrms_get_active_alerts: async (input: ToolInput) => {
+  rapidrms_get_active_alerts: async (input: ToolInput, creds?: RapidRMSCredentials) => {
     try {
       // Implementation would fetch from alerts API
       return {
@@ -329,9 +344,9 @@ export const operationsExecutors: Record<string, ExecutorFn> = {
  * Analytics executors
  */
 export const analyticsExecutors: Record<string, ExecutorFn> = {
-  rapidrms_get_department_margins: async (input: ToolInput) => {
+  rapidrms_get_department_margins: async (input: ToolInput, creds?: RapidRMSCredentials) => {
     try {
-      const client = getClient();
+      const client = getClient(creds);
 
       const { data: depts } = await client.get('/api/Department', {});
       const { data: sales } = await client.getSales({
@@ -381,7 +396,11 @@ export const allExecutors: Record<string, ExecutorFn> = {
 /**
  * Execute a tool by name
  */
-export async function executeTool(toolName: string, input: ToolInput): Promise<ToolResult> {
+export async function executeTool(
+  toolName: string,
+  input: ToolInput,
+  creds?: RapidRMSCredentials
+): Promise<ToolResult> {
   const executor = allExecutors[toolName];
 
   if (!executor) {
@@ -392,5 +411,5 @@ export async function executeTool(toolName: string, input: ToolInput): Promise<T
   }
 
   log.debug('Executing tool', { toolName });
-  return executor(input);
+  return executor(input, creds);
 }

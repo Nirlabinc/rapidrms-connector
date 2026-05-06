@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import WsLib from 'ws';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
@@ -13,13 +14,9 @@ if (!supabaseUrl || !supabaseServiceKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  realtime: {
-    params: {
-      eventsPerSecond: 0,
-    },
-  },
-});
+(globalThis as any).WebSocket = WsLib;
+
+export const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function getUserIdFromApiKey(
   keyHash: string

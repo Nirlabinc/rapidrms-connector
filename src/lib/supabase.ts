@@ -3,7 +3,6 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import ws from 'ws';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
@@ -16,9 +15,11 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   realtime: {
-    ws: ws,
+    params: {
+      eventsPerSecond: 0,
+    },
   },
-} as any);
+});
 
 export async function getUserIdFromApiKey(
   keyHash: string
